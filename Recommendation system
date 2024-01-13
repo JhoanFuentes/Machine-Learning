@@ -1,0 +1,60 @@
+To develop a recommendation system using collaborative filtering, we can use Python's scikit-surprise library. 
+This package is specifically designed for recommendation systems and offers a variety of algorithms and tools for their implementation. 
+
+Data Preparation: You'll need a dataset that contains information about restaurant purchases. 
+This dataset might have columns like restaurant_id, product_id, and rating (which could be purchase frequency or some preference indicator).
+
+Building the Recommendation Model: We'll use a collaborative filtering algorithm like SVD (Singular Value Decomposition) provided by scikit-surprise.
+
+Training and Testing the Model: We'll split the dataset into a training set and a test set to train and evaluate the model.
+
+Generating Recommendations: Once the model is trained, we'll use it to predict products that might be of interest to a specific restaurant.
+
+First, make sure you have the scikit-surprise library installed:
+pip install scikit-surprise
+
+Python code:
+from surprise import SVD, Dataset, Reader
+from surprise.model_selection import train_test_split
+import pandas as pd
+
+# Example data: restaurant_id, product_id, rating
+data = [
+    [1, 101, 5.0],
+    [1, 102, 3.0],
+    [1, 103, 2.5],
+    [2, 101, 2.0],
+    [2, 102, 2.5],
+    [2, 103, 5.0],
+    [2, 104, 4.5],
+    # ... more data ...
+]
+
+# Convert the data into a format Surprise can use
+reader = Reader(rating_scale=(1, 5))
+data = Dataset.load_from_df(pd.DataFrame(data, columns=['restaurant_id', 'product_id', 'rating']), reader)
+
+# Split the data into training and test sets
+trainset, testset = train_test_split(data, test_size=0.25)
+
+# Use SVD (Singular Value Decomposition)
+algo = SVD()
+
+# Train the algorithm on the training set
+algo.fit(trainset)
+
+# Make predictions on the test set
+predictions = algo.test(testset)
+
+# Predictions for a specific restaurant
+restaurant_id = 1
+recommended_products = []
+for product_id in range(1, 105):  # Assuming we have 104 products
+    estimate = algo.predict(restaurant_id, product_id).est
+    recommended_products.append((product_id, estimate))
+
+# Sort the recommendations
+recommended_products.sort(key=lambda x: x[1], reverse=True)
+
+# Display top 5 recommendations
+print(recommended_products[:5])
